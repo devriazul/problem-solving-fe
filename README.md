@@ -1,66 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# COVID Vaccine Registration System
 
-## About Laravel
+This project is a Laravel-based COVID vaccine registration system designed to fulfill the requirements of the coding test. The system allows users to register for vaccination, assigns them to a vaccine center, schedules a vaccination date based on availability, and notifies them via email before their scheduled vaccination. It also provides a search feature for users to check their registration and vaccination status using their NID.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
+- User registration with vaccine center selection.
+- Vaccine centers have a daily limit on the number of users they can serve.
+- Users are scheduled based on a "first come, first serve" strategy.
+- Email notifications are sent to users the night before their scheduled vaccination.
+- A search page where users can check their vaccination status using their NID.
+- Optimized for quick searches and fast user registration.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
+- PHP 8.0 or later
+- Composer
+- MySQL
+- Node.js (if using a front-end like Vue or React)
+- A mail server or email service provider (e.g., Mailtrap, Gmail, etc.) for email notifications
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Installation Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/covid-vaccine-registration.git
+   cd covid-vaccine-registration
+   ```
 
-## Learning Laravel
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. Set up environment variables:
+   Copy .env.example to .env:
+   ```bash
+   cp .env.example .env
+   ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. Update your .env file with the appropriate values for:
+   - Database connection
+   - Mail service (Mailtrap, Gmail, or another SMTP service)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. Run database migrations:
+   This will create the necessary tables and seed the database with pre-populated vaccine centers:
+   ```bash
+   php artisan migrate --seed
+   ```
+   Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+   Serve the application:
+   ```bash
+   php artisan serve
+   ```
 
-## Laravel Sponsors
+6. Access the application:
+   Open your browser and go to http://localhost:8000
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## How to Use
+### Registration
+- Visit the registration page at `/register`.
+- Fill in your name, email, NID, and select a vaccine center.
+- The system will automatically assign you a vaccination date based on center availability.
+- You will receive an email the night before your vaccination date.
 
-### Premium Partners
+### Search Vaccination Status
+- Visit the search page at `/search`.
+- Enter your NID to check your vaccination status:
+  - If not registered, the system will prompt you to register.
+  - If registered but not scheduled, it will display "Not scheduled."
+  - If scheduled, it will show the vaccination date.
+  - If the vaccination date has passed, it will display "Vaccinated."
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Project Structure
+- `UserRegistration`: Handles user data and scheduling.
+- `VaccineCenter`: Stores vaccine center information and their daily limits.
+- `VaccineScheduled`: A Mailable class that sends an email notification to users.
+- `RegistrationController`: Manages the logic for registration and search functionalities.
 
-## Contributing
+## Optimizations
+- Efficient querying: Used where clauses and eager loading to optimize data retrieval for both registration and search processes.
+- Caching: Implement caching for search results to avoid repeated database queries, improving performance on frequent searches (can be implemented if needed).
+- Queueing: For larger systems, the email notifications can be queued to offload work from the main request-response cycle, improving performance.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Future Enhancements
+### SMS Notifications
+If an SMS notification feature is needed in the future, the following changes would be required:
+- Integrate an SMS gateway API (such as Twilio or Nexmo) into the project.
+- Update the `VaccineScheduled` class to send an SMS in addition to the email, using the selected SMS provider's API.
+- Modify .env to store the necessary API keys and settings for the SMS gateway.
+- Optionally, implement SMS queueing to send notifications in the background.
 
-## Code of Conduct
+## Conclusion
+This project demonstrates a simple yet effective system for COVID vaccine registration and scheduling. The system is designed to be extensible and efficient, with room for future improvements like SMS notifications and caching.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Thank You
