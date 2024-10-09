@@ -51,29 +51,58 @@ class RegistrationController extends Controller
         return redirect('/')->with('success', 'Registration successful.');
     }
 
-    // Search for user registrations based on input
+    public function index()
+    {
+        return view('search');
+    }
+
     public function search(Request $request)
     {
-        // Validate search input
+        // Validate incoming request data
         $request->validate([
-            'query' => 'required|string',
+            'nid' => 'required|string',
         ]);
 
-        // Perform the search
-        $registrations = UserRegistration::where('name', 'like', '%' . $request->query . '%')
-            ->orWhere('nid', 'like', '%' . $request->query . '%')
-            ->get();
+        // Search for the registration
+        $registration = UserRegistration::where('nid', $request->nid)->first();
+        $searchPerformed = true; // Set this flag to true regardless of whether the user was found
 
-        // Return search results to a view
-        return view('registration.search_results', compact('registrations'));
+        // Return the search view with the registration data
+        return view('search', compact('registration', 'searchPerformed'))
+            ->with('success', $registration ? 'Results found for NID: ' . $registration->nid : 'No registration found for the provided NID.');
     }
+
+
+
 
     // Schedule vaccination date
     private function scheduleVaccination($center)
     {
-        // Logic to schedule vaccination date
-        // Here is an example that returns the next available weekday
-        $nextDate = now()->nextWeekday(); // Adjust logic as necessary for your needs
-        return $nextDate;
+        // Define the desired scheduling logic
+        $preferredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']; // Days available for vaccination
+        $today = now();
+
+        // Check the availability of the vaccine center and adjust scheduling accordingly
+        if (in_array($today->format('l'), $preferredDays)) {
+            // If today is a preferred day, schedule for today
+            return $today;
+        } else {
+            // Find the next available weekday
+            foreach ($preferredDays as $day) {
+                $nextDate = now()->next($day);
+                if ($this->isCenterAvailable($center, $nextDate)) {
+                    return $nextDate; // Return the next available date based on the center's availability
+                }
+            }
+        }
+
+        // If no preferred day is found this week, schedule for next week's Sunday
+        return now()->next('Sunday');
+    }
+
+    // Example function to check if the vaccine center is available on a specific date
+    private function isCenterAvailable($center, $date)
+    {
+        return true; // Assuming the center is available; adjust as necessary
     }
 }
