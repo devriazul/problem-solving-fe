@@ -11,6 +11,7 @@ class CreateVaccineCentersTable extends Migration
         Schema::create('vaccine_centers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('location');
             $table->integer('daily_limit')->default(100); // Example field for daily limit
             $table->timestamps();
         });

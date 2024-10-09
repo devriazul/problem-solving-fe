@@ -9,7 +9,7 @@ class VaccineCenter extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'daily_limit'];
+    protected $fillable = ['name', 'location', 'daily_limit'];
 
     public function userRegistrations()
     {

@@ -30,30 +30,39 @@
 
                 {{-- Display previous search results if available --}}
                 @if (isset($registration))
-                <div class="card p-4 mt-4">
-                    <h2 class="pb-3 text-success">Results Found:</h2>
-                    <p class="fw-bold">Name: {{ $registration->name }}</p>
-                    <p class="fw-bold">NID: {{ $registration->nid }}</p>
-                    <p class="fw-bold">Status:
-                        @if ($registration->vaccinated)
-                            <span class="text-success">Vaccinated</span>
-                        @elseif ($registration->scheduled_date)
-                            <span class="text-warning">Scheduled on {{ $registration->scheduled_date }}</span>
-                        @else
-                            <span class="text-danger">Not Scheduled</span>
-                        @endif
-                    </p>
-                </div>
-                @elseif (isset($searchPerformed) && !$registration)
-                <div class="alert alert-warning mt-4">
-                    <h4 class="text-center">No Results Found</h4>
-                    <p class="text-center">No vaccination record found for the provided NID. <br> If you are a new user, please register now.</p>
-                    <div class="text-center mt-3">
-                        <a class="btn btn-success btn-sm fw-semibold text-white px-3" href="/register">Register Now</a>
-                    </div>
-                </div>
-                @endif
+                    <div class="card p-4 mt-4">
+                        <h2 class="pb-3 text-success">Results Found:</h2>
+                        <p class="fw-bold">Name: {{ $registration->name }}</p>
+                        <p class="fw-bold">NID: {{ $registration->nid }}</p>
+                        <p class="fw-bold">Status:
+                            @if ($registration->vaccinated)
+                                <span class="text-success">Vaccinated</span>
+                            @elseif ($registration->scheduled_date)
+                                <span class="text-warning">Scheduled on {{ $registration->scheduled_date }}</span>
+                            @else
+                                <span class="text-danger">Not Scheduled</span>
+                            @endif
+                        </p>
 
+                        {{-- Display vaccine center information if available --}}
+                        @if (isset($vaccineCenter))
+                            <div class="mt-4">
+                                <h3 class="text-success">Vaccine Center Information:</h3>
+                                <p class="fw-bold">Center Name: {{ $vaccineCenter->name }}</p>
+                                <p class="fw-bold">Location: {{ $vaccineCenter->location }}</p>
+                                <p class="fw-bold">Daily Limit: {{ $vaccineCenter->daily_limit }}</p>
+                            </div>
+                        @endif
+                    </div>
+                @elseif (isset($searchPerformed) && !$registration)
+                    <div class="alert alert-warning mt-4">
+                        <h4 class="text-center">No Results Found</h4>
+                        <p class="text-center">No vaccination record found for the provided NID. <br> If you are a new user, please register now.</p>
+                        <div class="text-center mt-3">
+                            <a class="btn btn-success btn-sm fw-semibold text-white px-3" href="/">Register Now</a>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Display validation error messages --}}
                 @if ($errors->any())

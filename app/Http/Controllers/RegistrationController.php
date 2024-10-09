@@ -58,51 +58,59 @@ class RegistrationController extends Controller
 
     public function search(Request $request)
     {
-        // Validate incoming request data
+        // Validate NID input
         $request->validate([
-            'nid' => 'required|string',
+            'nid' => 'required',
         ]);
 
-        // Search for the registration
+        // Search for the registration based on NID
         $registration = UserRegistration::where('nid', $request->nid)->first();
-        $searchPerformed = true; // Set this flag to true regardless of whether the user was found
+        $searchPerformed = true; // Flag to indicate that search has been performed
 
-        // Return the search view with the registration data
-        return view('search', compact('registration', 'searchPerformed'))
-            ->with('success', $registration ? 'Results found for NID: ' . $registration->nid : 'No registration found for the provided NID.');
+        // If registration exists, fetch vaccine center information
+        if ($registration) {
+            // Use the vaccine_center_id to retrieve the vaccine center information
+            $vaccineCenter = VaccineCenter::find($registration->vaccine_center_id);
+
+            // Pass both registration and vaccine center data to the view
+            return view('search', compact('registration', 'vaccineCenter', 'searchPerformed'));
+        } else {
+            return view('search', compact('registration', 'searchPerformed'))
+                ->with('error', 'No registration found for the provided NID.');
+        }
     }
 
-
-
-
-    // Schedule vaccination date
+    // Example function to schedule vaccination
     private function scheduleVaccination($center)
     {
-        // Define the desired scheduling logic
-        $preferredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']; // Days available for vaccination
+        // Define the preferred days for vaccination
+        $preferredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
         $today = now();
 
-        // Check the availability of the vaccine center and adjust scheduling accordingly
-        if (in_array($today->format('l'), $preferredDays)) {
-            // If today is a preferred day, schedule for today
-            return $today;
-        } else {
-            // Find the next available weekday
-            foreach ($preferredDays as $day) {
-                $nextDate = now()->next($day);
-                if ($this->isCenterAvailable($center, $nextDate)) {
-                    return $nextDate; // Return the next available date based on the center's availability
-                }
+        // Loop through each day starting from today, and find the next available day
+        for ($i = 0; $i < count($preferredDays); $i++) {
+            $checkDate = now()->addDays($i); // Start with today and move to subsequent days
+            // Check if the day is preferred and if the center has availability
+            if (in_array($checkDate->format('l'), $preferredDays) && $this->isCenterAvailable($center, $checkDate)) {
+                return $checkDate; // Return the next available day
             }
         }
 
-        // If no preferred day is found this week, schedule for next week's Sunday
+        // If no available day is found, default to the next week's Sunday
         return now()->next('Sunday');
     }
+
 
     // Example function to check if the vaccine center is available on a specific date
     private function isCenterAvailable($center, $date)
     {
-        return true; // Assuming the center is available; adjust as necessary
+        // Get the total number of registrations for the given center on the given date
+        $registrationsCount = UserRegistration::where('vaccine_center_id', $center->id)
+                            ->whereDate('scheduled_date', $date->format('Y-m-d'))
+                            ->count();
+
+        // Check if the number of registrations is less than the daily limit
+        return $registrationsCount < $center->daily_limit;
     }
+
 }
