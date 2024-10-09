@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
         // Call your seeders here
         $this->call([
             VaccineCenterSeeder::class,
-            // Add other seeders as needed
+
         ]);
     }
 }

@@ -21,7 +21,6 @@ class VaccineCenterSeeder extends Seeder
             ['name' => 'Center I', 'location' => 'Dhaka', 'daily_limit' => 100],
             ['name' => 'Center J', 'location' => 'Dhaka', 'daily_limit' => 100],
 
-            // Add more centers as needed
         ]);
     }
 }
